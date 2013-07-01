@@ -1,1 +1,71 @@
-var server;server=function(a){var b,c,d,e,f,g,h,i;return f=require("fs"),g=require("http"),b=require("websocket").server,d=f.readFileSync(__dirname+"/client.js"),c=function(a){return a.replace("</body>","<script>"+(""+d)+"</script></body>")},server=g.createServer(function(b,d){var e,f;return e="",f=g.request({hostname:"localhost",port:a.proxy,method:b.method,path:b.url},function(a){return a.on("data",function(a){return e+=a}),a.on("end",function(){return d.end(c(e),"binary")})}),f.end()}),server.listen(a.reload),i=new b({httpServer:server,autoAcceptConnections:!1}),e=[],i.on("request",function(a){var b;return b=a.accept(null,a.origin),e.push(b),b.on("close",function(){return e.splice(e.indexOf(b),1)})}),h=function(a){var b,c,d,f;for(null==a&&(a=!1),f=[],c=0,d=e.length;d>c;c++)b=e[c],f.push(b.sendUTF(a?"refresh":"reload"));return f}},module.exports=server;
+var server;
+
+server = function(opts) {
+  var WebSocketServer, appendScript, client, connections, fs, http, reload, wsServer;
+  fs = require('fs');
+  http = require('http');
+  WebSocketServer = require('websocket').server;
+  client = fs.readFileSync(__dirname + '/client.js');
+  appendScript = function(content) {
+    return content.replace('</body>', "<script>" + (client.toString()) + "</script></body>");
+  };
+  server = http.createServer(function(request, response) {
+    var proxyReq;
+    proxyReq = http.request({
+      hostname: "localhost",
+      port: opts.proxy,
+      method: request.method,
+      path: request.url,
+      headers: request.headers
+    }, function(proxyRes) {
+      var content, html;
+      html = proxyRes.headers['content-type'] === "text/html";
+      content = "";
+      proxyRes.on('data', function(chunk) {
+        if (!html) {
+          return response.write(chunk, 'binary');
+        }
+        return content += chunk;
+      });
+      proxyRes.on('end', function() {
+        if (html) {
+          return response.end(appendScript(content), 'binary');
+        }
+        return response.end();
+      });
+      if (!html) {
+        return response.writeHead(proxyRes.statusCode, proxyRes.headers);
+      }
+    });
+    return proxyReq.end();
+  });
+  server.listen(opts.reload);
+  wsServer = new WebSocketServer({
+    httpServer: server,
+    autoAcceptConnections: false
+  });
+  connections = [];
+  wsServer.on("request", function(request) {
+    var connection;
+    connection = request.accept(null, request.origin);
+    connections.push(connection);
+    return connection.on("close", function() {
+      return connections.splice(connections.indexOf(connection), 1);
+    });
+  });
+  reload = function(refreshOnly) {
+    var connection, _i, _len, _results;
+    if (refreshOnly == null) {
+      refreshOnly = false;
+    }
+    _results = [];
+    for (_i = 0, _len = connections.length; _i < _len; _i++) {
+      connection = connections[_i];
+      _results.push(connection.sendUTF((refreshOnly ? 'refresh' : 'reload')));
+    }
+    return _results;
+  };
+  return reload;
+};
+
+module.exports = server;

@@ -7,22 +7,36 @@ server = (opts) ->
   WebSocketServer = require('websocket').server
   client = fs.readFileSync __dirname + '/client.js'
   
-  appendScript = (html) ->
-    html.replace '</body>', "<script>#{client.toString()}</script></body>"
+  appendScript = (content) ->
+    content.replace '</body>', "<script>#{client.toString()}</script></body>"
 
   server = http.createServer (request, response) ->
-    html = ""
 
     proxyReq = http.request
       hostname: "localhost"
       port: opts.proxy
       method: request.method
       path: request.url
+      headers: request.headers
     , (proxyRes) ->
-      proxyRes.on 'data', (chunk) -> html += chunk
-      proxyRes.on 'end', ->
-        response.end appendScript(html), 'binary'
+      
+      html = proxyRes.headers['content-type'] is "text/html"
+      content = ""
+      
+      proxyRes.on 'data', (chunk) -> #content += chunk
+        return response.write chunk, 'binary' unless html
+        content += chunk
 
+      proxyRes.on 'end', ->
+        return response.end appendScript(content), 'binary' if html
+        response.end()
+      
+      response.writeHead proxyRes.statusCode, proxyRes.headers unless html
+    
+    #response.on 'data', (chunk) ->
+    #  proxyReq.write chunk, 'binary'
+    #response.on 'end', -> proxyReq.end()
+    
     proxyReq.end()
   
   server.listen opts.reload
