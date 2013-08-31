@@ -1,12 +1,12 @@
 
 server = (opts) ->
-  
+
   fs        = require 'fs'
   http      = require 'http'
 
   WebSocketServer = require('websocket').server
   client = fs.readFileSync __dirname + '/client.js'
-  
+
   appendScript = (content) ->
     content.replace '</body>', "<script>#{client.toString()}</script></body>"
 
@@ -19,10 +19,10 @@ server = (opts) ->
       path: request.url
       headers: request.headers
     , (proxyRes) ->
-      
-      html = proxyRes.headers['content-type'] is "text/html"
+
+      html = proxyRes.headers['content-type'].indexOf("text/html") > -1
       content = ""
-      
+
       proxyRes.on 'data', (chunk) -> #content += chunk
         return response.write chunk, 'binary' unless html
         content += chunk
@@ -30,21 +30,21 @@ server = (opts) ->
       proxyRes.on 'end', ->
         return response.end appendScript(content), 'binary' if html
         response.end()
-      
+
       response.writeHead proxyRes.statusCode, proxyRes.headers unless html
-    
+
     #response.on 'data', (chunk) ->
     #  proxyReq.write chunk, 'binary'
     #response.on 'end', -> proxyReq.end()
-    
+
     proxyReq.end()
-  
+
   server.listen opts.reload
 
   wsServer = new WebSocketServer
     httpServer: server
     autoAcceptConnections: false
-  
+
   connections = []
 
   wsServer.on "request", (request) ->
@@ -55,7 +55,7 @@ server = (opts) ->
 
   reload = (refreshOnly = false) ->
     for connection in connections
-      connection.sendUTF (if refreshOnly then 'refresh' else 'reload') 
+      connection.sendUTF (if refreshOnly then 'refresh' else 'reload')
 
   return reload
 

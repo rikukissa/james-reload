@@ -19,7 +19,7 @@ server = function(opts) {
       headers: request.headers
     }, function(proxyRes) {
       var content, html;
-      html = proxyRes.headers['content-type'] === "text/html";
+      html = proxyRes.headers['content-type'].indexOf("text/html") > -1;
       content = "";
       proxyRes.on('data', function(chunk) {
         if (!html) {
