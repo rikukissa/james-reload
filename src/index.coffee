@@ -19,8 +19,8 @@ server = (opts) ->
       path: request.url
       headers: request.headers
     , (proxyRes) ->
-
-      html = proxyRes.headers['content-type'].indexOf("text/html") > -1
+      headers = proxyRes.headers['content-type']
+      html = headers? and headers.indexOf("text/html") > -1
       content = ""
 
       proxyRes.on 'data', (chunk) -> #content += chunk
@@ -32,10 +32,6 @@ server = (opts) ->
         response.end()
 
       response.writeHead proxyRes.statusCode, proxyRes.headers unless html
-
-    #response.on 'data', (chunk) ->
-    #  proxyReq.write chunk, 'binary'
-    #response.on 'end', -> proxyReq.end()
 
     proxyReq.end()
 
