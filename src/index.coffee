@@ -27,12 +27,14 @@ server = (opts) ->
         content += chunk
 
       proxyRes.on 'end', ->
-        return response.end appendScript(content), 'binary' if html
+        return response.end appendScript(content), 'utf-8' if html
         response.end()
 
       response.writeHead proxyRes.statusCode, proxyRes.headers unless html
+
     request.on 'data', (data) ->
       proxyReq.write(data)
+
     request.on 'end', ->
      proxyReq.end()
 
