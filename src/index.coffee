@@ -1,4 +1,3 @@
-
 server = (opts) ->
 
   fs        = require 'fs'
@@ -11,7 +10,6 @@ server = (opts) ->
     content.replace '</body>', "<script>#{client.toString()}</script></body>"
 
   server = http.createServer (request, response) ->
-
     proxyReq = http.request
       hostname: "localhost"
       port: opts.proxy
@@ -19,6 +17,7 @@ server = (opts) ->
       path: request.url
       headers: request.headers
     , (proxyRes) ->
+
       headers = proxyRes.headers['content-type']
       html = headers? and headers.indexOf("text/html") > -1
       content = ""
@@ -32,8 +31,10 @@ server = (opts) ->
         response.end()
 
       response.writeHead proxyRes.statusCode, proxyRes.headers unless html
-
-    proxyReq.end()
+    request.on 'data', (data) ->
+      proxyReq.write(data)
+    request.on 'end', ->
+     proxyReq.end()
 
   server.listen opts.reload
 
