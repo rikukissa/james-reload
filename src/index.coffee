@@ -10,33 +10,38 @@ server = (opts) ->
     content.replace '</body>', "<script>#{client.toString()}</script></body>"
 
   server = http.createServer (request, response) ->
-    proxyReq = http.request
-      hostname: "localhost"
-      port: opts.proxy
-      method: request.method
-      path: request.url
-      headers: request.headers
-    , (proxyRes) ->
+    createRequest = ->
+      proxyReq = http.request
+        hostname: "localhost"
+        port: opts.proxy
+        method: request.method
+        path: request.url
+        headers: request.headers
+      , (proxyRes) ->
 
-      headers = proxyRes.headers['content-type']
-      html = headers? and headers.indexOf("text/html") > -1
-      content = ""
+        headers = proxyRes.headers['content-type']
+        html = headers? and headers.indexOf("text/html") > -1
+        content = ""
 
-      proxyRes.on 'data', (chunk) -> #content += chunk
-        return response.write chunk, 'binary' unless html
-        content += chunk
+        proxyRes.on 'data', (chunk) -> #content += chunk
+          return response.write chunk, 'binary' unless html
+          content += chunk
 
-      proxyRes.on 'end', ->
-        return response.end appendScript(content), 'utf-8' if html
-        response.end()
+        proxyRes.on 'end', ->
+          return response.end appendScript(content), 'utf-8' if html
+          response.end()
 
-      response.writeHead proxyRes.statusCode, proxyRes.headers unless html
+        response.writeHead proxyRes.statusCode, proxyRes.headers unless html
 
-    request.on 'data', (data) ->
-      proxyReq.write(data)
+      request.on 'data', (data) ->
+        proxyReq.write(data)
 
-    request.on 'end', ->
-     proxyReq.end()
+      request.on 'end', ->
+       proxyReq.end()
+
+      proxyReq.on 'error', createRequest
+
+    createRequest()
 
   server.listen opts.reload
 
