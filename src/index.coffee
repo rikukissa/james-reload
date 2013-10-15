@@ -57,9 +57,11 @@ server = (opts) ->
     connection.on "close", () ->
       connections.splice connections.indexOf(connection), 1
 
-  reload = (refreshOnly = false) ->
+  reload = (opts = {}) ->
+    opts.stylesheetsOnly = opts.stylesheetsOnly or false
+
     for connection in connections
-      connection.sendUTF (if refreshOnly then 'refresh' else 'reload')
+      connection.sendUTF (if opts.stylesheetsOnly then 'refresh' else 'reload')
 
   return reload
 
