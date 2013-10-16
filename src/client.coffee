@@ -1,23 +1,25 @@
-window.WebSocket = window.WebSocket || window.MozWebSocket
+do (Websocket = window.WebSocket || window.MozWebSocket) ->
+  # __opts__ is replaced with reload config
+  # before this script is served to client
+  opts = __opts__
 
-init = (afterDisconnect = false) ->
-  connection = new WebSocket("ws://#{document.domain}:9002/")
-  connection.onmessage = (msg) ->
-    refresh = () ->
-      for el in document.querySelectorAll('link[rel="stylesheet"]')
-        unless el.getAttribute('data-href-origin')?
-          el.setAttribute('data-href-origin', el.getAttribute('href'))
-        el.setAttribute 'href', el.getAttribute('data-href-origin') + '?' + Date.now()
+  initializeReload = (afterDisconnect = false) ->
+    connection = new WebSocket("ws://#{document.domain}:#{opts.reload}/")
 
-    refresh() if msg.data == 'refresh'
-    location.reload() if msg.data == 'reload'
+    connection.onmessage = (msg) ->
+      return refresh() if msg.data == 'refresh'
+      location.reload()
 
-  connection.onclose = ->
-    setTimeout ->
-      init true
-    , 100
+    connection.onclose = ->
+      initializeReload true
 
-  connection.onopen = ->
-    location.reload() if afterDisconnect
+    connection.onopen = ->
+      location.reload() if afterDisconnect
 
-init()
+  refreshStylesheets = () ->
+    for el in document.querySelectorAll('link[rel="stylesheet"]')
+      unless el.getAttribute('data-href-origin')?
+        el.setAttribute('data-href-origin', el.getAttribute('href'))
+      el.setAttribute 'href', el.getAttribute('data-href-origin') + '?' + Date.now()
+
+  initializeReload()

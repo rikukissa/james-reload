@@ -1,13 +1,14 @@
-server = (opts) ->
-
+module.exports = (opts) ->
   fs        = require 'fs'
   http      = require 'http'
 
   WebSocketServer = require('websocket').server
-  client = fs.readFileSync __dirname + '/client.js'
 
-  appendScript = (content) ->
-    content.replace '</body>', "<script>#{client.toString()}</script></body>"
+  clientScript = fs.readFileSync(__dirname + '/client.js')
+    .toString().replace '__opts__', JSON.stringify opts
+
+  appendScript = (html) ->
+    html.replace '</body>', "<script>#{clientScript}</script></body>"
 
   server = http.createServer (request, response) ->
     createRequest = ->
@@ -19,19 +20,19 @@ server = (opts) ->
         headers: request.headers
       , (proxyRes) ->
 
-        headers = proxyRes.headers['content-type']
-        html = headers? and headers.indexOf("text/html") > -1
-        content = ""
+        contentType = proxyRes.headers['content-type']
+        isHTML = contentType?.toLowerCase().indexOf("text/html") > -1
+        htmlData = ""
 
-        proxyRes.on 'data', (chunk) -> #content += chunk
-          return response.write chunk, 'binary' unless html
-          content += chunk
+        proxyRes.on 'data', (chunk) ->
+          return response.write chunk, 'binary' unless isHTML
+          htmlData += chunk
 
         proxyRes.on 'end', ->
-          return response.end appendScript(content), 'utf-8' if html
+          return response.end appendScript(htmlData), 'utf-8' if isHTML
           response.end()
 
-        response.writeHead proxyRes.statusCode, proxyRes.headers unless html
+        response.writeHead proxyRes.statusCode, proxyRes.headers unless isHTML
 
       request.on 'data', (data) ->
         proxyReq.write(data)
@@ -65,5 +66,5 @@ server = (opts) ->
 
   return reload
 
-module.exports = server
+
 
