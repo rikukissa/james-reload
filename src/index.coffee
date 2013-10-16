@@ -14,7 +14,7 @@ module.exports = (opts) ->
     createRequest = ->
       proxyReq = http.request
         hostname: "localhost"
-        port: opts.proxy
+        port: opts.proxy || opts.proxyPort
         method: request.method
         path: request.url
         headers: request.headers
@@ -44,7 +44,7 @@ module.exports = (opts) ->
 
     createRequest()
 
-  server.listen opts.reload
+  server.listen opts.reload || opts.srcPort
 
   wsServer = new WebSocketServer
     httpServer: server
