@@ -1,8 +1,13 @@
-module.exports = (opts) ->
+module.exports = (opts = {}) ->
   fs        = require 'fs'
   http      = require 'http'
+  wsServer  = require('websocket').server
 
-  WebSocketServer = require('websocket').server
+  opts.proxyPort = opts.proxyPort or opts.proxy or 9002
+  opts.srcPort = opts.srcPort or opts.reload or 9001
+  opts.keepReconnecting = opts.keepReconnecting or true
+  opts.reloadAfterReconnect = opts.reloadAfterReconnect or true
+  opts.debug = opts.debug or false
 
   clientScript = fs.readFileSync(__dirname + '/client.js')
     .toString().replace '__opts__', JSON.stringify opts
@@ -14,7 +19,7 @@ module.exports = (opts) ->
     createRequest = ->
       proxyReq = http.request
         hostname: "localhost"
-        port: opts.proxy || opts.proxyPort
+        port: opts.proxyPort
         method: request.method
         path: request.url
         headers: request.headers
@@ -40,13 +45,14 @@ module.exports = (opts) ->
       request.on 'end', ->
        proxyReq.end()
 
-      proxyReq.on 'error', createRequest
+      proxyReq.on 'error', ->
+        createRequest() if opts.keepReconnecting
 
     createRequest()
 
-  server.listen opts.reload || opts.srcPort
+  server.listen opts.srcPort
 
-  wsServer = new WebSocketServer
+  wsServer = new wsServer
     httpServer: server
     autoAcceptConnections: false
 

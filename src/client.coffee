@@ -14,7 +14,7 @@ do (Websocket = window.WebSocket || window.MozWebSocket) ->
       initializeReload true
 
     connection.onopen = ->
-      location.reload() if afterDisconnect
+      location.reload() if afterDisconnect and opts.reloadAfterReconnect
 
   refreshStylesheets = () ->
     for el in document.querySelectorAll('link[rel="stylesheet"]')
