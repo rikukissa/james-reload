@@ -2,6 +2,7 @@ module.exports = (opts = {}) ->
   fs        = require 'fs'
   http      = require 'http'
   wsServer  = require('websocket').server
+  colors    = require 'colors'
 
   opts.proxyPort = opts.proxyPort or opts.proxy or 9002
   opts.srcPort = opts.srcPort or opts.reload or 9001
@@ -14,6 +15,9 @@ module.exports = (opts = {}) ->
 
   appendScript = (html) ->
     html.replace '</body>', "<script>#{clientScript}</script></body>"
+
+  log = (args...)->
+    console.log.apply console, ['James-reload:'].concat args
 
   server = http.createServer (request, response) ->
     createRequest = ->
@@ -45,8 +49,12 @@ module.exports = (opts = {}) ->
       request.on 'end', ->
        proxyReq.end()
 
-      proxyReq.on 'error', ->
-        createRequest() if opts.keepReconnecting
+      proxyReq.on 'error', (e) ->
+        log 'Proxy request failed:'.red, e.message
+
+        if opts.keepReconnecting
+          log 'Reconnecting'.yellow
+          createRequest()
 
     createRequest()
 
@@ -67,8 +75,12 @@ module.exports = (opts = {}) ->
   reload = (opts = {}) ->
     opts.stylesheetsOnly = opts.stylesheetsOnly or false
 
+    signal = if opts.stylesheetsOnly then 'refresh' else 'reload'
+
     for connection in connections
-      connection.sendUTF (if opts.stylesheetsOnly then 'refresh' else 'reload')
+      connection.sendUTF signal
+
+    log signal.green
 
   return reload
 

@@ -1,6 +1,6 @@
 {
   "name": "james-reload",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "browser reload plugin for james.js",
   "main": "index.js",
   "scripts": {
@@ -22,7 +22,8 @@
   "readmeFilename": "README.md",
   "dependencies": {
     "websocket": "~1.0.8",
-    "coffee-script": "~1.6.3"
+    "coffee-script": "~1.6.3",
+    "colors": "~0.6.2"
   },
   "readme": "# James.js reload \nBrowser reload plugin for [James.js](https://github.com/leonidas/james.js)\n\n```javascript\nvar reload = require('james-reload')({\n  proxy: 9001,\n  reload: 9002\n});\n\nreload(); // location.reload in browser\nreload(true); // refresh stylesheets\n\n```",
   "_id": "james-reload@0.0.1",
