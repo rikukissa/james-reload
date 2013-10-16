@@ -4,8 +4,9 @@ module.exports = (opts = {}) ->
   wsServer  = require('websocket').server
   colors    = require 'colors'
 
-  opts.proxyPort = opts.proxyPort or opts.proxy or 9002
-  opts.srcPort = opts.srcPort or opts.reload or 9001
+  opts.proxyPort = opts.proxyPort or opts.reload or 9002
+  opts.srcPort = opts.srcPort or opts.proxy or 9001
+
   opts.keepReconnecting = opts.keepReconnecting or true
   opts.reloadAfterReconnect = opts.reloadAfterReconnect or true
   opts.debug = opts.debug or false
@@ -23,7 +24,7 @@ module.exports = (opts = {}) ->
     createRequest = ->
       proxyReq = http.request
         hostname: "localhost"
-        port: opts.proxyPort
+        port: opts.srcPort
         method: request.method
         path: request.url
         headers: request.headers
@@ -58,7 +59,7 @@ module.exports = (opts = {}) ->
 
     createRequest()
 
-  server.listen opts.srcPort
+  server.listen opts.proxyPort
 
   wsServer = new wsServer
     httpServer: server

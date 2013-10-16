@@ -4,7 +4,7 @@ do (Websocket = window.WebSocket || window.MozWebSocket) ->
   opts = __opts__
 
   initializeReload = (afterDisconnect = false) ->
-    connection = new WebSocket("ws://#{document.domain}:#{opts.reload}/")
+    connection = new WebSocket("ws://#{document.domain}:#{opts.proxyPort}/")
 
     connection.onmessage = (msg) ->
       return refresh() if msg.data == 'refresh'
