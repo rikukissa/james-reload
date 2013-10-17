@@ -7,7 +7,7 @@ do (Websocket = window.WebSocket || window.MozWebSocket) ->
     connection = new WebSocket("ws://#{document.domain}:#{opts.proxyPort}/")
 
     connection.onmessage = (msg) ->
-      return refresh() if msg.data == 'refresh'
+      return refreshStylesheets() if msg.data == 'refresh'
       location.reload()
 
     connection.onclose = ->
