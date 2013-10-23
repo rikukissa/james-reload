@@ -29,7 +29,6 @@ module.exports = (opts = {}) ->
         path: request.url
         headers: request.headers
       , (proxyRes) ->
-
         contentType = proxyRes.headers['content-type']
         isHTML = contentType?.toLowerCase().indexOf("text/html") > -1
         htmlData = ""
@@ -51,11 +50,11 @@ module.exports = (opts = {}) ->
        proxyReq.end()
 
       proxyReq.on 'error', (e) ->
-        log 'Proxy request failed:'.red, e.message
 
-        if opts.keepReconnecting
-          log 'Reconnecting'.yellow
-          createRequest()
+      proxyReq.on 'socket', (socket) ->
+        socket.setTimeout 2000
+        socket.on 'timeout', ->
+          proxyReq.abort()
 
     createRequest()
 
