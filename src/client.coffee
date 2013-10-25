@@ -20,6 +20,17 @@ do (Websocket = window.WebSocket || window.MozWebSocket) ->
     for el in document.querySelectorAll('link[rel="stylesheet"]')
       unless el.getAttribute('data-href-origin')?
         el.setAttribute('data-href-origin', el.getAttribute('href'))
-      el.setAttribute 'href', el.getAttribute('data-href-origin') + '?' + Date.now()
+
+      copy = el.cloneNode true
+
+      copy.onload = ->
+        el.parentNode.removeChild el
+      copy.onerror = ->
+        el.parentNode.removeChild copy
+
+      copy.setAttribute 'href', el.getAttribute('data-href-origin') + '?' + Date.now()
+
+      el.parentNode.appendChild copy
 
   initializeReload()
+  console.log 'lol'
