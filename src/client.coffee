@@ -33,4 +33,3 @@ do (Websocket = window.WebSocket || window.MozWebSocket) ->
       el.parentNode.appendChild copy
 
   initializeReload()
-  console.log 'lol'
