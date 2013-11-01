@@ -31,6 +31,7 @@ module.exports = (opts = {}) ->
       , (proxyRes) ->
         contentType = proxyRes.headers['content-type']
         isHTML = contentType?.toLowerCase().indexOf("text/html") > -1
+        isRedirect = proxyRes.statusCode in [302, 307]
         htmlData = ""
 
         proxyRes.on 'data', (chunk) ->
@@ -41,7 +42,7 @@ module.exports = (opts = {}) ->
           return response.end appendScript(htmlData), 'utf-8' if isHTML
           response.end()
 
-        response.writeHead proxyRes.statusCode, proxyRes.headers unless isHTML
+        response.writeHead proxyRes.statusCode, proxyRes.headers if isRedirect || not isHTML
 
       request.on 'data', (data) ->
         proxyReq.write(data)
