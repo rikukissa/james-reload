@@ -1,0 +1,39 @@
+#!/usr/bin/env node
+
+var program = require('commander');
+var reloader = require('../index');
+var james = require('james');
+var path = require('path');
+
+program
+  .option('-s, --source <n>', 'Port where content is proxied from', parseInt, 9001)
+  .option('-p, --proxy <n>', 'Port where reloading versio is served to', parseInt, 9002)
+  .option('-w, --watch <items>', 'Watch files matching glob, multiple paths can be given with comma', function(value) {
+    return value.split(',');
+  }, [])
+  .parse(process.argv);
+
+var reload = reloader({
+  proxyPort: program.proxy,
+  srcPort: program.source,
+  debug: true
+});
+
+var stylesheetExtensions = [
+  '.css',
+  '.styl',
+  '.less',
+  '.sass'
+];
+
+program.watch.forEach(function(glob) {
+  james.watch(glob, function(event, file) {
+
+    var stylesheet = stylesheetExtensions.indexOf(path.extname(file)) > -1;
+
+    reload({
+      stylesheetsOnly: stylesheet
+    });
+
+  });
+});
