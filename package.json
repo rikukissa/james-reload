@@ -1,6 +1,6 @@
 {
   "name": "james-reload",
-  "version": "0.4.6",
+  "version": "0.5.0",
   "description": "browser reload plugin for james.js",
   "main": "index.js",
   "scripts": {
