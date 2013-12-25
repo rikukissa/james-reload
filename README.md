@@ -1,5 +1,13 @@
 # James-reload
 Browser reload plugin for [James.js](https://github.com/leonidas/james.js)
+
+## Requirements
+* Node.js
+* NPM
+
+## Installation
+    npm install james-reload
+
 ## Binary
     jreload -s <source port> -p <port to proxy to> -w <list of globs to watch>
 Example
@@ -23,7 +31,7 @@ var reload = reloadService({
 Reads content from port __80__ and proxies it to port __9002__ with the client side script appended
 
 ---
-<a name="reloadService" />
+
 ## reloadFactory(config)
 Returns a function [reload](#reload) for sending a signal when client should reload content
 ####config (Object)
