@@ -6,7 +6,7 @@ Browser reload plugin for [James.js](https://github.com/leonidas/james.js)
 * NPM
 
 ## Installation
-    npm install james-reload
+    npm install -g james-reload
 
 ## Binary
     jreload -s <source port> -p <port to proxy to> -w <list of globs to watch>
