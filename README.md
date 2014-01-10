@@ -38,7 +38,7 @@ var reload = reloadFactory({
   proxyPort: 9002
 });
 
-setTimeout(function() {
+setTimeout(function() {
   reload();
 }, 5000)
 
