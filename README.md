@@ -22,13 +22,29 @@ More information
 ## API
 __Basic configuration__
 ```javascript
-var reloadService = require('james-reload');
-var reload = reloadService({
+var reloadFactory = require('james-reload');
+var reload = reloadFactory({
   srcPort: 80,
   proxyPort: 9002
 });
 ```
 Reads content from port __80__ and proxies it to port __9002__ with the client side script appended
+
+__Example usage__
+```javascript
+var reloadFactory = require('james-reload');
+var reload = reloadFactory({
+  srcPort: 80,
+  proxyPort: 9002
+});
+
+setTimeout(function() {
+  reload();
+}, 5000)
+
+```
+
+Reloads your browsers location after 5 seconds.
 
 ---
 
